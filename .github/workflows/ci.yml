@@ -8,7 +8,7 @@ on:
 
 permissions:
   contents: read
-  security-events: write
+  packages: write
 
 jobs:
   backend-ci:
@@ -65,9 +65,10 @@ jobs:
         run: npm run build
 
   container-security:
-    name: Docker Build & Trivy Vulnerability Scan
+    name: Docker Build, Security Scan & GHCR Publish
     runs-on: ubuntu-latest
     needs: [ backend-ci, frontend-ci ]
+
     steps:
       - uses: actions/checkout@v4
 
@@ -94,3 +95,27 @@ jobs:
           exit-code: '0'
           ignore-unfixed: true
           severity: 'CRITICAL,HIGH'
+
+      - name: Log in to GitHub Container Registry
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish Backend Image to GHCR
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          docker tag veritas-pay-backend:${{ github.sha }} ghcr.io/naveentadi626-oss/veritas-pay-backend:${{ github.sha }}
+          docker tag veritas-pay-backend:${{ github.sha }} ghcr.io/naveentadi626-oss/veritas-pay-backend:latest
+          docker push ghcr.io/naveentadi626-oss/veritas-pay-backend:${{ github.sha }}
+          docker push ghcr.io/naveentadi626-oss/veritas-pay-backend:latest
+
+      - name: Publish Frontend Image to GHCR
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          docker tag veritas-pay-frontend:${{ github.sha }} ghcr.io/naveentadi626-oss/veritas-pay-frontend:${{ github.sha }}
+          docker tag veritas-pay-frontend:${{ github.sha }} ghcr.io/naveentadi626-oss/veritas-pay-frontend:latest
+          docker push ghcr.io/naveentadi626-oss/veritas-pay-frontend:${{ github.sha }}
+          docker push ghcr.io/naveentadi626-oss/veritas-pay-frontend:latest
