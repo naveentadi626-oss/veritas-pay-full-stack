@@ -78,9 +78,18 @@ jobs:
         run: docker build -t veritas-pay-frontend:${{ github.sha }} ./frontend
 
       - name: Run Trivy scan on backend image
-        uses: aquasecurity/trivy-action@0.24.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: veritas-pay-backend:${{ github.sha }}
+          format: table
+          exit-code: '0'
+          ignore-unfixed: true
+          severity: 'CRITICAL,HIGH'
+
+      - name: Run Trivy scan on frontend image
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: veritas-pay-frontend:${{ github.sha }}
           format: table
           exit-code: '0'
           ignore-unfixed: true
