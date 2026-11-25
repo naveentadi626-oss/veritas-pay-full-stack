@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: veritas-frontend
+  namespace: veritas-pay
+  labels:
+    app: veritas-frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: veritas-frontend
+  template:
+    metadata:
+      labels:
+        app: veritas-frontend
+    spec:
+      containers:
+        - name: veritas-frontend
+          image: ghcr.io/veritas-pay/frontend:latest
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "300m"
+              memory: "256Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: veritas-frontend-service
+  namespace: veritas-pay
+spec:
+  selector:
+    app: veritas-frontend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: veritas-pay-ingress
+  namespace: veritas-pay
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  rules:
+    - host: veritas-pay.example.com
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: veritas-backend-service
+                port:
+                  number: 80
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: veritas-frontend-service
+                port:
+                  number: 80

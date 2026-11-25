@@ -1,0 +1,10 @@
+.env
+target/
+backend/target/
+frontend/node_modules/
+frontend/dist/
+frontend/playwright-report/
+frontend/test-results/
+.idea/
+*.iml
+.DS_Store

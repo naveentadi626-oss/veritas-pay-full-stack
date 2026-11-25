@@ -1,0 +1,14 @@
+#!/bin/sh
+set -e
+MVN_VERSION="3.9.9"
+WRAPPER_DIR="$(cd "$(dirname "$0")" && pwd)/.mvn/wrapper"
+MVN_HOME="$HOME/.m2/wrapper/dists/apache-maven-$MVN_VERSION"
+if [ ! -x "$MVN_HOME/bin/mvn" ]; then
+  mkdir -p "$HOME/.m2/wrapper/dists"
+  URL="https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/$MVN_VERSION/apache-maven-$MVN_VERSION-bin.tar.gz"
+  TMP_TAR="/tmp/apache-maven-$MVN_VERSION.tar.gz"
+  curl -fsSL "$URL" -o "$TMP_TAR"
+  tar -xzf "$TMP_TAR" -C "$HOME/.m2/wrapper/dists"
+  rm -f "$TMP_TAR"
+fi
+exec "$MVN_HOME/bin/mvn" "$@"

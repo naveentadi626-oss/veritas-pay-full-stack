@@ -1,0 +1,12 @@
+spring:
+  flyway:
+    enabled: true
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
+app:
+  outbox:
+    relay-interval-ms: 500
+  rate-limit:
+    requests-per-minute: 1000
